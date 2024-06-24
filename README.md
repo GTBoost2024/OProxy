@@ -1,6 +1,3 @@
-明白了，我会将内容写成一个完整的 `README.md` 文件：
-
-```markdown
 # Proxy and Transit Server Setup Script
 
 This repository contains a Python script designed to automate the setup of a transit server using NGINX with the stream module and a proxy server using ZBProxy. The script ensures all necessary packages are installed, downloads and configures the software, and sets up the servers with minimal user intervention.
@@ -34,12 +31,6 @@ Before running the script, make sure you have the following installed:
     ```bash
     git clone https://github.com/yourusername/proxy-transit-server.git
     cd proxy-transit-server
-    ```
-
-2. Install required Python packages:
-
-    ```bash
-    pip3 install -r requirements.txt
     ```
 
 ### Usage
@@ -97,8 +88,6 @@ proxy-transit-server/
 │
 ├── main.py               # Main script
 ├── README.md             # This readme file
-├── requirements.txt      # Python dependencies
-└── ...
 ```
 
 ## Contributing
@@ -112,11 +101,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgements
 
 - [NGINX](https://nginx.org/)
-- [ZBProxy](https://file.uhsea.com/)
+- [ZBProxy](https://github.com/layou233/ZBProxy)
 
 ## Contact
 
-For any questions or suggestions, feel free to reach out at [your email](mailto:youremail@example.com).
-```
-
-将这个内容保存为 `README.md` 文件，并上传到你的 GitHub 仓库。这样，访问者可以方便地阅读和了解你的项目。
+For any questions or suggestions, feel free to reach out at [your email](mailto:ccvvxuruoteng@gmail.com).
