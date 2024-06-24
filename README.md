@@ -29,8 +29,8 @@ Before running the script, make sure you have the following installed:
 1. Clone this repository:
 
     ```bash
-    git clone https://github.com/yourusername/proxy-transit-server.git
-    cd proxy-transit-server
+    git clone git@github.com:GreshAnt/OProxy.git
+    cd OProxy
     ```
 
 ### Usage
