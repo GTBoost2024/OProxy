@@ -1,4 +1,4 @@
-# Proxy and Transit Server Setup Script
+# OProxy
 
 This repository contains a Python script designed to automate the setup of a transit server using NGINX with the stream module and a proxy server using ZBProxy. The script ensures all necessary packages are installed, downloads and configures the software, and sets up the servers with minimal user intervention.
 
