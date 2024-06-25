@@ -6,7 +6,7 @@ import os  # Importing os module for operating system functionalities
 import sys  # Importing sys module for system-specific parameters and functions
 
 _name = "OProxy"  # Defining constant _name as "OProxy"
-_version = "1.0.0"  # Defining constant _version as "1.0.0"
+_version = "1.0.4"  # Defining constant _version as "1.0.0"
 _by = "GreshAnt"  # Defining constant _by as "GreshAnt"
 
 class NetworkControl:
@@ -203,15 +203,17 @@ class HandleJsonFile(HandleFile):
 class ProxyServer:
     """Class to manage operations specific to a proxy server."""
     
-    def __init__(self) -> None:
+    def __init__(self, transit_server_ip) -> None:
         """Initialize ProxyServer object."""
         self.network_control = NetworkControl()
         self.system_control = SystemControl()
+        
+        self.transit_server_ip = transit_server_ip
 
     def download_zbproxy(self):
         """Download ZBProxy software."""
         print("Downloading ZBProxy...")
-        return self.network_control.download_file('https://file.uhsea.com/2406/5d3185d966a77f885750bc733c0d533aJ0.', 'zbproxy')
+        return self.network_control.download_file('https://gitee.com/xu-ruoteng/data/raw/master/ZBProxy-linux-386-v1', 'zbproxy')
 
     def init_zbproxy(self):
         """Initialize ZBProxy configuration."""
@@ -237,7 +239,8 @@ class ProxyServer:
                             "EnableMaxLimit": False
                         },
                         "HostnameAccess": {
-                            "Mode": ""
+                            "Mode": "allow",
+                            "ListTags" : ["TransitServerIP"]
                         },
                         "NameAccess": {
                             "Mode": ""
@@ -254,7 +257,9 @@ class ProxyServer:
                     }
                 }
             ],
-            "Lists": {}
+            "Lists": {
+                "TransitServerIP" : [self.transit_server_ip]
+            }
         })
         print("ZBProxy initialized successfully")
         return 'ZBProxy initialized successfully'
@@ -274,7 +279,8 @@ class TransitServer(ProxyServer):
     
     def __init__(self):
         """Initialize TransitServer object."""
-        super().__init__()
+        self.network_control = NetworkControl()
+        self.system_control = SystemControl()
         self.zbproxy_config = HandleJsonFile('ZBProxy.json')
 
     def init_zbproxy(self):
@@ -354,7 +360,7 @@ class MinecraftTransitService:
                 },
                 "PingMode": "",
                 "MotdFavicon": "{DEFAULT_MOTD}",
-                "MotdDescription": "§d{NAME}§e service is working on §a§o{INFO}§r\n§c§lProxy for §6§n{HOST}:{PORT}§r"
+                "MotdDescription": "§d{NAME}§e service is working on §a§o{INFO}§r\n§c§lProxy for §6§nmc.hypixel.net:25565§r"
             },
             "TLSSniffing": {
                 "RejectNonTLS": False
@@ -370,11 +376,12 @@ class Main:
     def __init__(self) -> None:
         """Initialize Main object."""
         self.transit_server = TransitServer()
-        self.proxy_server = ProxyServer()
+        self.proxy_server = ProxyServer("")
 
-    def setup_proxy_server(self):
+    def setup_proxy_server(self, transit_ip):
         """Set up the proxy server."""
         print("Setting up Proxy Server...")
+        self.proxy_server = ProxyServer(transit_ip)
         print(self.proxy_server.download_zbproxy())
         print(self.proxy_server.init_zbproxy())
 
@@ -434,7 +441,7 @@ class Main:
             case "proxy":
                 match args[2]:
                     case "setup":
-                        self.setup_proxy_server()
+                        self.setup_proxy_server(args[3])
                     case "run":
                         self.run_proxy_server()
 
