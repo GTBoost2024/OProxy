@@ -1,6 +1,6 @@
 # Minecraft Acceleration with OProxy
 
-**Version:** 1.0.9               
+**Version:** 1.1.0                    
 **Author:** GreshAnt
 
 ## Overview
@@ -83,7 +83,7 @@ OProxy is a Python utility tailored for accelerating Minecraft gameplay by manag
 ### Updating Proxy Server
   - **Updating in the Terminal**
   ```
-  sudo ./OProxy update proxy
+  sudo ./OProxy update zbproxy
   ```
 
 ## License
