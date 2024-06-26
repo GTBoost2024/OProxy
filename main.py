@@ -612,6 +612,7 @@ class Main:
                     case "program":
                         self.upgrade_program()
 
+
 if __name__ == "__main__":
     main = Main()
     main.run(sys.argv)
