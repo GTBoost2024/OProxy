@@ -4,11 +4,14 @@ import requests  # Importing requests module to make HTTP requests
 import json  # Importing json module for JSON handling
 import os  # Importing os module for operating system functionalities
 import sys  # Importing sys module for system-specific parameters and functions
+import time
+
 
 _name = "OProxy"  # Defining constant _name as "OProxy"
-_version = "1.0.4"  # Defining constant _version as "1.0.0"
+_version = "1.0.9"
 _by = "GreshAnt"  # Defining constant _by as "GreshAnt"
 
+        
 class NetworkControl:
     """Class to handle network-related operations like downloading files."""
     
@@ -199,21 +202,24 @@ class HandleJsonFile(HandleFile):
             print(f"JSON data written to {self.file_path}")
         except TypeError as e:
             print(f"Error writing JSON to {self.file_path}: {e}")
-
+            
+            
+            
 class ProxyServer:
     """Class to manage operations specific to a proxy server."""
     
-    def __init__(self, transit_server_ip) -> None:
+    def __init__(self, transit_server_ip, gh_token) -> None:
         """Initialize ProxyServer object."""
         self.network_control = NetworkControl()
         self.system_control = SystemControl()
+        self.program_control = ProgramControl(gh_token)
         
         self.transit_server_ip = transit_server_ip
 
-    def download_zbproxy(self):
+    def download_zbproxy(self, token):
         """Download ZBProxy software."""
         print("Downloading ZBProxy...")
-        return self.network_control.download_file('https://gitee.com/xu-ruoteng/data/raw/master/ZBProxy-linux-386-v1', 'zbproxy')
+        return self.network_control.download_file(self.program_control.get_latest_artifact_download_url(token), "zbproxy")
 
     def init_zbproxy(self):
         """Initialize ZBProxy configuration."""
@@ -345,7 +351,7 @@ class MinecraftTransitService:
                 "Mode": ""
             },
             "Minecraft": {
-                "EnableHostnameRewrite": True,
+                "EnableHostnameRewrite": False,
                 "OnlineCount": {
                     "Max": 114514,
                     "Online": -1,
@@ -370,19 +376,174 @@ class MinecraftTransitService:
             }
         }
 
+
+class ProgramControl:
+    
+    def __init__(self, token) -> None:
+        self.system_control = SystemControl()
+        self.network_control = NetworkControl()
+        
+        self.token = token
+        self.cpu_model = platform.processor()
+    
+
+    def get_latest_artifact_download_url(self, token):
+        GITHUB_TOKEN = token
+        REPO_OWNER = 'layou233'
+        REPO_NAME = 'ZBProxy'
+        
+        # 设置请求头
+        headers = {
+            'Authorization': f'token {GITHUB_TOKEN}',
+            'Accept': 'application/vnd.github+json'
+        }
+
+        # 获取最新的workflow run
+        workflow_runs_url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/actions/runs'
+        response = requests.get(workflow_runs_url, headers=headers)
+        response.raise_for_status()  # 确保请求成功
+        workflow_runs = response.json()
+
+        if 'workflow_runs' in workflow_runs and workflow_runs['workflow_runs']:
+            latest_run = workflow_runs['workflow_runs'][0]
+            run_id = latest_run['id']
+
+            # 获取该workflow run的artifacts
+            artifacts_url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/actions/runs/{run_id}/artifacts'
+            response = requests.get(artifacts_url, headers=headers)
+            response.raise_for_status()  # 确保请求成功
+            artifacts = response.json()
+
+            if 'artifacts' in artifacts and artifacts['artifacts']:
+                for artifact in artifacts['artifacts']:
+                    if artifact['name'] == ('ZBProxy-linux-amd64-v3' if ('v3' in self.cpu_model) else 'ZBProxy-linux-amd64-v1'):
+                        artifact_id = artifact['id']
+                        break
+                else:
+                    print('没有找到指定名称的artifact，则返回None')
+                    return None  # 如果没有找到指定名称的artifact，则返回None
+
+                # 获取artifact下载URL
+                download_url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/actions/artifacts/{artifact_id}/zip'
+                response = requests.get(download_url, headers=headers, allow_redirects=False)
+                response.raise_for_status()  # 确保请求成功
+
+                if response.status_code == 302:  # 重定向
+                    download_redirect_url = response.headers['Location']
+                    return download_redirect_url
+                else:
+                    print('下载链接获取失败，则返回None')
+                    return None  # 如果下载链接获取失败，则返回None
+            else:
+                print('没有找到artifacts，则返回None')
+                return None  # 如果没有找到artifacts，则返回None
+        else:
+            print('没有找到workflow runs，则返回None')
+            return None  # 如果没有找到workflow runs，则返回None
+
+    def unzip_zbproxy(self):
+        self.system_control.install_package('unzip')
+        self.system_control.run_command('unzip zbproxy.zip')
+        self.system_control.run_command('rm -rf zbproxy.zip')
+
+    def update_zbproxy(self):
+        print("Updating ZBProxy...")
+        try:
+            download_url = self.get_latest_artifact_download_url(self.token)
+            if download_url:
+                self.system_control.run_command('rm -rf zbproxy')
+                self.network_control.download_file(download_url, 'zbproxy.zip')
+                self.unzip_zbproxy()
+                self.system_control.run_command(f"mv {('ZBProxy-linux-amd64-v3' if ('v3' in self.cpu_model) else 'ZBProxy-linux-amd64-v1')} zbproxy")
+                self.system_control.run_command('sudo chmod +x zbproxy')
+                self.system_control.run_command('sudo systemctl restart ZBProxy')
+                print("ZBProxy updated successfully.")
+                return "ZBProxy updated successfully."
+            else:
+                print("Failed to get the download URL.")
+                return "Failed to get the download URL."
+        except Exception as e:
+            print(f"Failed to update ZBProxy: {str(e)}")
+            return f"Failed to update ZBProxy: {str(e)}"
+
+    @staticmethod
+    def get_latest_release_download_url(repo_owner, repo_name, asset_name):
+        # 获取最新的release
+        releases_url = f'https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest'
+        response = requests.get(releases_url)
+        response.raise_for_status()  # 确保请求成功
+        release = response.json()
+
+        # 检查release中的assets
+        if 'assets' in release and release['assets']:
+            for asset in release['assets']:
+                if asset['name'] == asset_name:
+                    download_url = asset['browser_download_url']
+                    return download_url
+            return "No matching asset found in the latest release."
+        else:
+            return "No assets found in the latest release."
+    
+    def upgrade_program(self):
+        print("Updating program...")
+        try:
+            # 备份旧版本
+            self.system_control.run_command('sudo mv OProxy OProxy.old')
+            
+            # 下载新版本
+            download_url = self.get_latest_release_download_url('GTBoost2024', 'OProxy', 'OProxy')
+            if download_url:
+                self.network_control.download_file(download_url, 'OProxy')
+                self.system_control.run_command('sudo rm -rf OProxy.old')
+                self.system_control.run_command('sudo chmod +x OProxy')
+                print("Program updated successfully.")
+                return "Program updated successfully."
+            else:
+                print("Failed to get the download URL.")
+                return "Failed to get the download URL."
+        except Exception as e:
+            print(f"Failed to upgrade program: {str(e)}")
+            return f"Failed to upgrade program: {str(e)}"
+
+
+
+
 class Main:
     """Main class to orchestrate setup and execution of proxy and transit servers."""
     
     def __init__(self) -> None:
         """Initialize Main object."""
         self.transit_server = TransitServer()
-        self.proxy_server = ProxyServer("")
+        
+        self.config = HandleJsonFile("config.json")
+        if self.config.create_file():
+            self.config.write_json({"token": "your_token"})
+            print('config.json created, please edit it and restart the program.')
+            sys.exit()
+        else:
+            print("config.json exists, continue...")
+            self.token = self.config.read_json()["token"]
+            self.program_control = ProgramControl(self.token)
+            self.proxy_server = ProxyServer("", self.token)
+
+    def update_zbproxy(self):
+        """Update ZBProxy."""
+        print("Updating ZBProxy...")
+        print(self.program_control.update_zbproxy())
+        print("ZBProxy updated successfully.")
+        return "ZBProxy updated successfully."
+
+    def upgrade_program(self):
+        """Upgrade the program."""
+        print("Upgrading program...")
+        print(self.program_control.upgrade_program())
+        print("Program upgraded successfully.")
 
     def setup_proxy_server(self, transit_ip):
         """Set up the proxy server."""
         print("Setting up Proxy Server...")
-        self.proxy_server = ProxyServer(transit_ip)
-        print(self.proxy_server.download_zbproxy())
+        self.proxy_server = ProxyServer(transit_ip, self.token)
+        print(self.proxy_server.download_zbproxy(self.token))
         print(self.proxy_server.init_zbproxy())
 
     def setup_transit_server(self):
@@ -444,6 +605,12 @@ class Main:
                         self.setup_proxy_server(args[3])
                     case "run":
                         self.run_proxy_server()
+            case "update":
+                match args[2]:
+                    case "zbproxy":
+                        self.update_zbproxy()
+                    case "program":
+                        self.upgrade_program()
 
 if __name__ == "__main__":
     main = Main()

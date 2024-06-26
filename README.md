@@ -1,6 +1,6 @@
 # Minecraft Acceleration with OProxy
 
-**Version:** 1.0.4               
+**Version:** 1.0.9               
 **Author:** GreshAnt
 
 ## Overview
@@ -15,62 +15,76 @@ OProxy is a Python utility tailored for accelerating Minecraft gameplay by manag
 - **Transit Server:** Extend proxy functionality to manage transit services, whitelist management, and specific Minecraft transit service configurations with `TransitServer`.
 
 ## Requirements
-- Python 3.6+
 - Ubuntu Linux (tested on Ubuntu)
+- Root access
 
 ## Installation
-1. Ensure Python 3.6 or higher is installed.
-2. Clone the repository:
+1. Ensure your system is Ubuntu Linux
+
+2. Download the file in releases.
+
+3. Give the file execution permission: 
+   
    ```
-   git clone https://github.com/GreshAnt/OProxy.git
-   ```
-3. Navigate to the repository directory:
-   ```
-   cd repository
+   chmod +x OProxy
    ```
 4. Run the setup for the proxy and transit servers:
    ```
-   python3 main.py proxy setup
+   ./OProxy proxy setup
    ```
    ```
-   python3 main.py transit setup
+   ./OProxy transit setup
    ```
 
 ## Usage
 ### Setting Up Proxy Server
 - **Setup:** Initialize and configure the proxy server.
    ```
-   python3 main.py proxy setup
+   ./OProxy proxy setup
    ```
 
 - **Running:** Start running the proxy server.
    ```
-   python3 main.py proxy run <transit_server_ip>
+   ./OProxy proxy run <transit_server_ip>
    ```
 
 ### Setting Up Transit Server
 - **Setup:** Initialize and configure the transit server.
    ```
-   python3 main.py transit setup
+   ./OProxy transit setup
    ```
 
 - **Running:** Start running the transit server.
    ```
-   python3 main.py transit run
+   ./OProxy transit run
    ```
 
 - **Adding a Transit Service:** Add a transit service to accelerate Minecraft gameplay.
    ```
-   python3 main.py transit target <target_ip> <target_port> <listen_port> <service_name>
+   ./OProxy transit target <target_ip> <target_port> <listen_port> <service_name>
    ```
 
 - **Managing Whitelist:** Manage whitelist entries for enhanced gameplay.
    ```
-   python3 main.py transit whitelist add <name> <group>
+   ./OProxy transit whitelist add <name> <group>
    ```
    ```
-   python3 main.py transit whitelist remove <name> <group>
+   ./OProxy transit whitelist remove <name> <group>
    ```
 
+## Updating
+
+### Updating OProxy
+   - **Updating in the Terminal**
+   ```
+   sudo ./OProxy update program
+   ```
+
+### Updating Proxy Server
+  - **Updating in the Terminal**
+  ```
+  sudo ./OProxy update proxy
+  ```
+
 ## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENCE](LICENCE) file for details.
