@@ -8,7 +8,7 @@ import time
 
 
 _name = "OProxy"  # Defining constant _name as "OProxy"
-_version = "1.1.0"
+_version = "1.1.1"
 _by = "GreshAnt"  # Defining constant _by as "GreshAnt"
 
         
@@ -221,7 +221,7 @@ class ProxyServer:
         print("Downloading ZBProxy...")
         return self.network_control.download_file(self.program_control.get_latest_artifact_download_url(token), "zbproxy")
 
-    def init_zbproxy(self):
+    def init_zbproxy(self, target_name: str, target_ip: str, target_port: str, listen_on: str):
         """Initialize ZBProxy configuration."""
         print("Initializing ZBProxy...")
         self.system_control.run_command("chmod +x zbproxy")
@@ -229,10 +229,10 @@ class ProxyServer:
         self.zbproxy_config.write_json({
             "Services": [
                 {
-                    "Name": "HypixelSpeedProxy",
-                    "TargetAddress": "mc.hypixel.net",
-                    "TargetPort": 25565,
-                    "Listen": 25565,
+                    "Name": target_name,
+                    "TargetAddress": target_ip,
+                    "TargetPort": int(target_port),
+                    "Listen": int(listen_on),
                     "Flow": "auto",
                     "IPAccess": {
                         "Mode": ""
@@ -289,6 +289,7 @@ class TransitServer(ProxyServer):
         self.system_control = SystemControl()
         self.zbproxy_config = HandleJsonFile('ZBProxy.json')
 
+
     def init_zbproxy(self):
         """Initialize ZBProxy configuration specific to transit server."""
         print("Initializing ZBProxy...")
@@ -331,6 +332,25 @@ class TransitServer(ProxyServer):
             self.zbproxy_config.write_json(config)
             print(f"{name} removed from {group}")
         return f"Removed {name} from the {group}"
+
+
+    def turn_on_whitelist(self, service_name):
+        config = self.zbproxy_config.read_json()
+        if config:
+            config["Services"][service_name]["Minecraft"]["HostnameAccess"]["Mode"] = "allow"
+            self.zbproxy_config.write_json(config)
+            print(f"Whitelist turned on for {service_name}")
+            return f"Whitelist turned on for {service_name}"
+
+    def turn_off_whitelist(self, service_name):
+        config = self.zbproxy_config.read_json()
+        if config:
+            config["Services"][service_name]["Minecraft"]["HostnameAccess"]["Mode"] = ""
+            self.zbproxy_config.write_json(config)
+            print(f"Whitelist turned off for {service_name}")
+            return f"Whitelist turned off for {service_name}"
+
+
 
 class MinecraftTransitService:
     """Class to represent a Minecraft transit service configuration."""
@@ -539,12 +559,12 @@ class Main:
         print(self.program_control.upgrade_program())
         print("Program upgraded successfully.")
 
-    def setup_proxy_server(self, transit_ip):
+    def setup_proxy_server(self, transit_ip, target_ip, target_port, listen_port, service_name):
         """Set up the proxy server."""
         print("Setting up Proxy Server...")
         self.proxy_server = ProxyServer(transit_ip, self.token)
         print(self.proxy_server.download_zbproxy(self.token))
-        print(self.proxy_server.init_zbproxy())
+        print(self.proxy_server.init_zbproxy(service_name, target_ip, target_port, listen_port))
 
     def setup_transit_server(self):
         """Set up the transit server."""
@@ -566,6 +586,17 @@ class Main:
         """Remove an item from a whitelist in the transit server."""
         print(f"Removing {name} from the {group}...")
         print(self.transit_server.remove_whitelist(name, group))
+
+    def turn_on_whitelist(self, group: str):
+        """Turn on the whitelist in the transit server."""
+        print(f'Turning on whitelist for {group}...')
+        print(self.transit_server.turn_on_whitelist(group))
+
+    def turn_off_whitelist(self, group: str):
+        """Turn off the whitelist in the transit server."""
+        print(f'Turning off whitelist for {group}...')
+        print(self.transit_server.turn_off_whitelist(group))
+
 
     def run_proxy_server(self):
         """Run the proxy server."""
@@ -599,18 +630,35 @@ class Main:
                                 self.add_to_whitelist(args[4], args[5])
                             case "remove":
                                 self.remove_from_whitelist(args[4], args[5])
+                            case "on":
+                                self.turn_on_whitelist(args[4])
+                            case "off":
+                                self.turn_off_whitelist(args[4])
+                            case other:
+                                print(f'error input : {other}')
+                    case other:
+                        print(f'error input {other}')
+
             case "proxy":
                 match args[2]:
                     case "setup":
-                        self.setup_proxy_server(args[3])
+                        self.setup_proxy_server(args[3], args[4], args[5], args[6], args[7])
+                        # transit server ip, target ip, target port, listen port, service name
                     case "run":
                         self.run_proxy_server()
+                    case other:
+                        print(f'error input {other}')
+
             case "update":
                 match args[2]:
                     case "zbproxy":
                         self.update_zbproxy()
                     case "program":
                         self.upgrade_program()
+                    case other:
+                        print(f'error input {other}')
+            case other:
+                print(f'error input {other}')    
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # Minecraft Acceleration with OProxy
 
-**Version:** 1.1.0                    
+**Version:** 1.1.1                    
 **Author:** GreshAnt
 
 ## Overview
@@ -28,49 +28,50 @@ OProxy is a Python utility tailored for accelerating Minecraft gameplay by manag
    ```
    chmod +x OProxy
    ```
-4. Run the setup for the proxy and transit servers:
-   ```
-   ./OProxy proxy setup
-   ```
-   ```
-   ./OProxy transit setup
-   ```
+
 
 ## Usage
 ### Setting Up Proxy Server
 - **Setup:** Initialize and configure the proxy server.
    ```
-   ./OProxy proxy setup
+   sudo ./OProxy proxy setup <transit_server_ip> <target_server_ip> <target_server_port> <listen_port> <service_name>
    ```
 
 - **Running:** Start running the proxy server.
    ```
-   ./OProxy proxy run <transit_server_ip>
+   sudo ./OProxy proxy run
    ```
 
 ### Setting Up Transit Server
 - **Setup:** Initialize and configure the transit server.
    ```
-   ./OProxy transit setup
+   sudo ./OProxy transit setup
    ```
 
 - **Running:** Start running the transit server.
    ```
-   ./OProxy transit run
+   sudo ./OProxy transit run
    ```
 
 - **Adding a Transit Service:** Add a transit service to accelerate Minecraft gameplay.
    ```
-   ./OProxy transit target <target_ip> <target_port> <listen_port> <service_name>
+   sudo ./OProxy transit target <target_ip> <target_port> <listen_port> <service_name>
    ```
 
 - **Managing Whitelist:** Manage whitelist entries for enhanced gameplay.
    ```
-   ./OProxy transit whitelist add <name> <group>
+   sudo ./OProxy transit whitelist add <name> <group>
    ```
    ```
-   ./OProxy transit whitelist remove <name> <group>
+   sudo ./OProxy transit whitelist remove <name> <group>
    ```
+   ```
+   sudo ./OProxy transit whitelist on
+   ```
+   ```
+   sudo ./OProxy transit whitelist off
+   ```
+
 
 ## Updating
 
