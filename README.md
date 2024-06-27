@@ -1,29 +1,28 @@
 # Minecraft Acceleration with OProxy
 
-**Version:** 1.1.1                    
+**Version:** 1.1.2
 **Author:** GreshAnt
 
 ## Overview
-OProxy is a Python utility tailored for accelerating Minecraft gameplay by managing proxy and transit server configurations on Ubuntu Linux. It simplifies downloading, executing system commands, managing packages, handling JSON configurations, and setting up systemd services.
+OProxy is a Python utility designed to accelerate Minecraft gameplay by managing proxy and transit server configurations on Ubuntu Linux. It simplifies the process of downloading, executing system commands, managing packages, handling JSON configurations, and setting up systemd services.
 
 ## Features
-- **Network Operations:** Download files from URLs using `NetworkControl`.
-- **System Control:** Execute shell commands, manage packages, and handle system-specific tasks with `SystemControl`.
-- **File Management:** Read, write, and create files with `HandleFile` and manage JSON files with `HandleJsonFile`.
-- **System Services:** Manage systemd services, including enabling and starting services with `SystemService`.
-- **Proxy Server:** Configure and run a proxy server optimized for Minecraft with `ProxyServer`.
-- **Transit Server:** Extend proxy functionality to manage transit services, whitelist management, and specific Minecraft transit service configurations with `TransitServer`.
+- **Network Operations:** Download files from URLs.
+- **System Control:** Execute shell commands, manage packages, and handle system-specific tasks.
+- **File Management:** Read, write, and create files, including JSON configuration files.
+- **System Services:** Manage systemd services, including enabling and starting services.
+- **Proxy Server:** Configure and run a proxy server optimized for Minecraft.
+- **Transit Server:** Manage transit services, including whitelist management and Minecraft-specific configurations.
 
 ## Requirements
-- Ubuntu Linux (tested on Ubuntu)
+- Ubuntu Linux
 - Root access
+- Python 3.x
 
 ## Installation
-1. Ensure your system is Ubuntu Linux
-
-2. Download the file in releases.
-
-3. Give the file execution permission: 
+1. Ensure your system is Ubuntu Linux.
+2. Download the latest release of OProxy.
+3. Give the file execution permission:
    
    ```
    chmod +x OProxy
@@ -34,13 +33,23 @@ OProxy is a Python utility tailored for accelerating Minecraft gameplay by manag
 ### Setting Up Proxy Server
 - **Setup:** Initialize and configure the proxy server.
    ```
-   sudo ./OProxy proxy setup <transit_server_ip> <target_server_ip> <target_server_port> <listen_port> <service_name>
+   sudo ./OProxy proxy setup <target_server_ip> <target_server_port> <listen_port>
    ```
 
 - **Running:** Start running the proxy server.
    ```
    sudo ./OProxy proxy run
    ```
+- **Adding a transit server:** Add a transit server to accelerate Minecraft gameplay.
+   In order to add a transit server, you need to run the following command:
+   ```
+   sudo ./OProxy proxy transit add <transit_server>
+   ```
+- **Removing a transit server:** Remove a transit server from the list.
+   ```
+   sudo ./OProxy proxy transit remove <transit_server>
+   ```
+
 
 ### Setting Up Transit Server
 - **Setup:** Initialize and configure the transit server.
@@ -55,7 +64,12 @@ OProxy is a Python utility tailored for accelerating Minecraft gameplay by manag
 
 - **Adding a Transit Service:** Add a transit service to accelerate Minecraft gameplay.
    ```
-   sudo ./OProxy transit target <target_ip> <target_port> <listen_port> <service_name>
+   sudo ./OProxy transit target add <target_ip> <target_port> <listen_port> <service_name>
+   ```
+
+- **Removing a Transit Service:** Remove a transit service from the list.
+   ```
+   sudo ./OProxy transit target remove <service_name>
    ```
 
 - **Managing Whitelist:** Manage whitelist entries for enhanced gameplay.
