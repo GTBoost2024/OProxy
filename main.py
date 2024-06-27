@@ -208,20 +208,19 @@ class HandleJsonFile(HandleFile):
 class ProxyServer:
     """Class to manage operations specific to a proxy server."""
     
-    def __init__(self, transit_server_ip, gh_token) -> None:
+    def __init__(self, gh_token) -> None:
         """Initialize ProxyServer object."""
         self.network_control = NetworkControl()
         self.system_control = SystemControl()
         self.program_control = ProgramControl(gh_token)
         
-        self.transit_server_ip = transit_server_ip
 
     def download_zbproxy(self, token):
         """Download ZBProxy software."""
         print("Downloading ZBProxy...")
         return self.network_control.download_file(self.program_control.get_latest_artifact_download_url(token), "zbproxy")
 
-    def init_zbproxy(self, target_name: str, target_ip: str, target_port: str, listen_on: str):
+    def init_zbproxy(self, target_ip: str, target_port: str, listen_on: str):
         """Initialize ZBProxy configuration."""
         print("Initializing ZBProxy...")
         self.system_control.run_command("chmod +x zbproxy")
@@ -229,7 +228,7 @@ class ProxyServer:
         self.zbproxy_config.write_json({
             "Services": [
                 {
-                    "Name": target_name,
+                    "Name": "MinecraftProxy",
                     "TargetAddress": target_ip,
                     "TargetPort": int(target_port),
                     "Listen": int(listen_on),
@@ -264,7 +263,7 @@ class ProxyServer:
                 }
             ],
             "Lists": {
-                "TransitServerIP" : [self.transit_server_ip]
+                "TransitServerIP" : []
             }
         })
         print("ZBProxy initialized successfully")
@@ -279,6 +278,30 @@ class ProxyServer:
         print(zbproxy_service.start_service())
         self.system_control.run_command('sudo ufw allow 25565/tcp')  # Allow traffic on port 25565
         print("ZBProxy running")
+
+    def add_transit_server_ip(self, ip: str):
+        config = self.zbproxy_config.read_json()
+        if ip not in config['Lists']['TransitServerIP']:
+            config['Lists']['TransitServerIP'].append(ip)
+            self.zbproxy_config.write_json(config)
+            print(f"Added {ip} to TransitServerIP list")
+            return 'done'
+        else:
+            print('IP already exists in TransitServerIP list')
+            return 'IP already exists'
+    
+    def remove_transit_server_ip(self, ip: str):
+        config = self.zbproxy_config.read_json()
+        if ip in config['Lists']['TransitServerIP']:
+            config['Lists']['TransitServerIP'].remove(ip)
+            self.zbproxy_config.write_json(config)
+            print(f"Removed {ip} from TransitServerIP list")
+            return 'done'
+        else:
+            print(f"{ip} not found in TransitServerIP list")
+            return 'Not found'
+
+
 
 class TransitServer(ProxyServer):
     """Class to manage operations specific to a transit server, inheriting from ProxyServer."""
@@ -310,6 +333,18 @@ class TransitServer(ProxyServer):
         if service_name not in org_config["Lists"]:
             org_config["Lists"][service_name] = []
         self.zbproxy_config.write_json(org_config)
+    
+    def remove_service(self, service_name: str):
+        """Remove a service configuration from ZBProxy."""
+        print(f"Removing service {service_name}...")
+        org_config = self.zbproxy_config.read_json()
+        for service in org_config["Services"]:
+            if service["Name"] == service_name:
+                org_config["Services"].remove(service)
+                self.zbproxy_config.write_json(org_config)
+                print(f"Service {service_name} removed")
+                return f"Service {service_name} removed"
+        
 
     def add_whitelist(self, name: str, group: str):
         """Add an item to a whitelist in ZBProxy configuration."""
@@ -546,7 +581,7 @@ class Main:
             print("config.json exists, continue...")
             self.token = self.config.read_json()["token"]
             self.program_control = ProgramControl(self.token)
-            self.proxy_server = ProxyServer("", self.token)
+            self.proxy_server = ProxyServer(self.token)
 
     def update_zbproxy(self):
         """Update ZBProxy."""
@@ -561,12 +596,11 @@ class Main:
         print(self.program_control.upgrade_program())
         print("Program upgraded successfully.")
 
-    def setup_proxy_server(self, transit_ip, target_ip, target_port, listen_port, service_name):
+    def setup_proxy_server(self, target_ip, target_port, listen_port):
         """Set up the proxy server."""
         print("Setting up Proxy Server...")
-        self.proxy_server = ProxyServer(transit_ip, self.token)
         print(self.proxy_server.download_zbproxy(self.token))
-        print(self.proxy_server.init_zbproxy(service_name, target_ip, target_port, listen_port))
+        print(self.proxy_server.init_zbproxy(target_ip, target_port, listen_port))
 
     def setup_transit_server(self):
         """Set up the transit server."""
@@ -574,10 +608,31 @@ class Main:
         print(self.transit_server.download_zbproxy())
         print(self.transit_server.init_zbproxy())
 
+
+    def add_a_transit_server_for_proxy(self, transit_server_hostname: str):
+        """Add a transit server for the proxy server."""
+        print("Adding a transit server...")
+        print(self.proxy_server.add_transit_server_ip(transit_server_hostname))
+    
+    def remove_a_transit_server_for_proxy(self, transit_server_hostname: str):
+        """Remove a transit server for the proxy server."""
+        print("Removing a transit server...")
+        print(self.proxy_server.remove_transit_server_ip(transit_server_hostname))
+
+
     def add_a_transit_service(self, target_ip, target_port, listen_port, service_name):
         """Add a transit service to the transit server."""
         print("Adding a transit service...")
         self.transit_server.add_service(MinecraftTransitService(target_ip, target_port, listen_port, service_name).service_dict)
+
+    def remove_a_transit_service(self, service_name):
+        """Remove a transit service from the transit server."""
+        print("Removing a transit service...")
+        self.transit_server.remove_service(service_name)
+
+
+    
+    # whitelist managing functions
 
     def add_to_whitelist(self, name: str, group: str):
         """Add an item to a whitelist in the transit server."""
@@ -599,6 +654,7 @@ class Main:
         print(f'Turning off whitelist for {group}...')
         print(self.transit_server.turn_off_whitelist(group))
 
+    # Running functions
 
     def run_proxy_server(self):
         """Run the proxy server."""
@@ -625,7 +681,11 @@ class Main:
                     case "run":
                         self.run_transit_server()
                     case "target":
-                        self.add_a_transit_service(args[3], args[4], args[5], args[6])
+                        match args[3]:
+                            case "add":
+                                self.add_a_transit_service(args[4], args[5], args[6], args[7])
+                            case "remove":
+                                self.remove_a_transit_service(args[4])
                     case "whitelist":
                         match args[3]:
                             case "add":
@@ -644,10 +704,17 @@ class Main:
             case "proxy":
                 match args[2]:
                     case "setup":
-                        self.setup_proxy_server(args[3], args[4], args[5], args[6], args[7])
-                        # transit server ip, target ip, target port, listen port, service name
+                        self.setup_proxy_server(args[3], args[4], args[5])
                     case "run":
                         self.run_proxy_server()
+                    case "transit":
+                        match args[3]:
+                            case "add":
+                                self.add_a_transit_server_for_proxy(args[4])
+                            case "remove":
+                                self.remove_a_transit_server_for_proxy(args[4])
+                            case other:
+                                print(f'error input {other}')
                     case other:
                         print(f'error input {other}')
 
