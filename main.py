@@ -8,7 +8,7 @@ import time
 
 
 _name = "OProxy"  # Defining constant _name as "OProxy"
-_version = "1.1.1"
+_version = "1.1.2"
 _by = "GreshAnt"  # Defining constant _by as "GreshAnt"
 
         

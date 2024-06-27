@@ -1,6 +1,6 @@
 # Minecraft Acceleration with OProxy
 
-**Version:** 1.1.2
+**Version:** 1.1.2      
 **Author:** GreshAnt
 
 ## Overview
