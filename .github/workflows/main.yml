@@ -1,5 +1,4 @@
 name: Build with Nuitka
-
 on:
   push:
     branches:
@@ -9,13 +8,11 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  build-20-04:
+    runs-on: ubuntu-20.04
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
     - name: Install Python and pip
       run: |
         sudo apt-get update
@@ -24,7 +21,6 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: '3.11.9'
-
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
@@ -33,9 +29,37 @@ jobs:
     - name: Build with Nuitka
       run: |
         python3 -m nuitka --standalone --onefile --output-dir=dist main.py
-        mv ./dist/main.bin ./OProxy
+        mv ./dist/main.bin ./OProxy-20.04
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
-        name: OProxy
-        path: OProxy
+        name: OProxy-20.04
+        path: OProxy-20.04
+
+  build-latest:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Install Python and pip
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-pip
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11.9'
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip3 install nuitka
+        pip3 install requests
+    - name: Build with Nuitka
+      run: |
+        python3 -m nuitka --standalone --onefile --output-dir=dist main.py
+        mv ./dist/main.bin ./OProxy-latest
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: OProxy-latest
+        path: OProxy-latest
