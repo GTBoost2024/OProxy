@@ -18,6 +18,10 @@ jobs:
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
+    - name: Fetch all branches
+      run: |
+        git fetch --all
+
     - name: Pull latest dev branch
       run: |
         git checkout dev
@@ -25,6 +29,9 @@ jobs:
 
     - name: Merge main into dev
       run: |
+        git checkout main
+        git pull origin main
+        git checkout dev
         git merge main
 
     - name: Push changes to dev
