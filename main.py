@@ -306,8 +306,9 @@ class ProxyServer:
 class TransitServer(ProxyServer):
     """Class to manage operations specific to a transit server, inheriting from ProxyServer."""
     
-    def __init__(self):
+    def __init__(self, gh_token):
         """Initialize TransitServer object."""
+        super().__init__(gh_token)
         self.network_control = NetworkControl()
         self.system_control = SystemControl()
         self.zbproxy_config = HandleJsonFile('ZBProxy.json')
@@ -570,8 +571,6 @@ class Main:
     
     def __init__(self) -> None:
         """Initialize Main object."""
-        self.transit_server = TransitServer()
-        
         self.config = HandleJsonFile("config.json")
         if self.config.create_file():
             self.config.write_json({"token": "your_token"})
@@ -582,6 +581,7 @@ class Main:
             self.token = self.config.read_json()["token"]
             self.program_control = ProgramControl(self.token)
             self.proxy_server = ProxyServer(self.token)
+            self.transit_server = TransitServer(self.token)
 
     def update_zbproxy(self):
         """Update ZBProxy."""
