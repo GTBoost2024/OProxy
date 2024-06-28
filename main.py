@@ -605,7 +605,7 @@ class Main:
     def setup_transit_server(self):
         """Set up the transit server."""
         print("Setting up Transit Server...")
-        print(self.transit_server.download_zbproxy())
+        print(self.transit_server.download_zbproxy(self.token))
         print(self.transit_server.init_zbproxy())
 
 
