@@ -275,6 +275,7 @@ class ProxyServer:
         zbproxy_service = SystemService('ZBProxy', 'ZBProxy service', f'{os.getcwd()}/zbproxy', os.getcwd(), 'zbproxy')
         zbproxy_service.fill_service_content()
         zbproxy_service.enable_service()
+        self.system_control.run_command('sudo chmod +x {os.getcwd()}/zbproxy')
         print(zbproxy_service.start_service())
         self.system_control.run_command('sudo ufw allow 25565/tcp')  # Allow traffic on port 25565
         print("ZBProxy running")
