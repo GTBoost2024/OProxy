@@ -7,9 +7,9 @@ import sys  # Importing sys module for system-specific parameters and functions
 import time
 
 
-_name = "OProxy"  # Defining constant _name as "OProxy"
-_version = "1.1.2"
-_by = "GreshAnt"  # Defining constant _by as "GreshAnt"
+_name = "OProxy"
+_version = "1.1.3"
+_by = "GreshAnt" 
 
         
 class NetworkControl:
