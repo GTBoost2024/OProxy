@@ -49,6 +49,10 @@ OProxy is a Python utility designed to accelerate Minecraft gameplay by managing
    ```
    sudo ./OProxy proxy transit remove <transit_server>
    ```
+- **Switch hostname access status:** Turn on/off hostname access for the proxy server.
+   ```
+   sudo ./OProxy proxy hostname <"on" or "off"">
+   ```
 
 
 ### Setting Up Transit Server

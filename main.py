@@ -211,7 +211,8 @@ class ProxyServer:
         self.network_control = NetworkControl()
         self.system_control = SystemControl()
         self.program_control = ProgramControl(gh_token)
-
+        self.zbproxy_config = HandleJsonFile('ZBProxy.json')
+        self.zbproxy_config.create_file()
         self.system_control.install_package('ufw')
         
 
@@ -224,7 +225,6 @@ class ProxyServer:
         """Initialize ZBProxy configuration."""
         print("Initializing ZBProxy...")
         self.system_control.run_command("chmod +x zbproxy")
-        self.zbproxy_config = HandleJsonFile('ZBProxy.json')
         self.zbproxy_config.write_json({
             "Services": [
                 {
@@ -300,6 +300,16 @@ class ProxyServer:
         else:
             print(f"{ip} not found in TransitServerIP list")
             return 'Not found'
+        
+    def turn_on_hostname_access(self):
+        print("Turning on hostname access...")
+        config = self.zbproxy_config.read_json()
+        config['Services'][0]['Minecraft']['HostnameAccess']['Mode'] = 'allow'
+    
+    def turn_off_hostname_access(self):
+        print("Turning off hostname access...")
+        config = self.zbproxy_config.read_json()
+        config['Services'][0]['Minecraft']['HostnameAccess']['Mode'] = ''
 
 
 
@@ -609,6 +619,14 @@ class Main:
         print(self.transit_server.init_zbproxy())
 
 
+    def turn_on_hostname_access(self):
+        print("Turning on hostname access...")
+        print(self.transit_server.turn_on_hostname_access())
+    
+    def turn_off_hostname_access(self):
+        print("Turning off hostname access...")
+        print(self.transit_server.turn_off_hostname_access())
+
     def add_a_transit_server_for_proxy(self, transit_server_hostname: str):
         """Add a transit server for the proxy server."""
         print("Adding a transit server...")
@@ -713,6 +731,14 @@ class Main:
                                 self.add_a_transit_server_for_proxy(args[4])
                             case "remove":
                                 self.remove_a_transit_server_for_proxy(args[4])
+                            case other:
+                                print(f'error input {other}')
+                    case "hostname":
+                        match args[3]:
+                            case "on":
+                                self.turn_on_hostname_access()
+                            case "off":
+                                self.turn_off_hostname_access()
                             case other:
                                 print(f'error input {other}')
                     case other:
