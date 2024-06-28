@@ -84,10 +84,10 @@ OProxy is a Python utility designed to accelerate Minecraft gameplay by managing
    sudo ./OProxy transit whitelist remove <name> <group>
    ```
    ```
-   sudo ./OProxy transit whitelist on
+   sudo ./OProxy transit whitelist on <group>
    ```
    ```
-   sudo ./OProxy transit whitelist off
+   sudo ./OProxy transit whitelist off <group>
    ```
 
 
