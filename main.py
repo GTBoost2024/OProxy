@@ -387,7 +387,7 @@ class TransitServer(ProxyServer):
         config = self.zbproxy_config.read_json()
         for service in config["Services"]:
             if service["Name"] == service_name:
-                service["Minecraft"]["HostnameAccess"]["Mode"] = "allow"
+                service["Minecraft"]["NameAccess"]["Mode"] = "allow"
                 self.zbproxy_config.write_json(config)
                 print(f"Whitelist turned on for {service_name}")
                 return f"Whitelist turned on for {service_name}"
@@ -396,7 +396,7 @@ class TransitServer(ProxyServer):
         config = self.zbproxy_config.read_json()
         for service in config["Services"]:
             if service["Name"] == service_name:
-                service["Minecraft"]["HostnameAccess"]["Mode"] = ""
+                service["Minecraft"]["NameAccess"]["Mode"] = ""
                 self.zbproxy_config.write_json(config)
                 print(f"Whitelist turned off for {service_name}")
                 return f"Whitelist turned off for {service_name}"
