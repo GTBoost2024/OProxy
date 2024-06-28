@@ -17,7 +17,7 @@ OProxy is a Python utility designed to accelerate Minecraft gameplay by managing
 ## Requirements
 - Ubuntu Linux
 - Root access
-- Python 3.x
+- Python 3.11 or higher
 
 ## Installation
 1. Ensure your system is Ubuntu Linux.
