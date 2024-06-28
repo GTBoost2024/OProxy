@@ -4,8 +4,6 @@ import requests  # Importing requests module to make HTTP requests
 import json  # Importing json module for JSON handling
 import os  # Importing os module for operating system functionalities
 import sys  # Importing sys module for system-specific parameters and functions
-import time
-
 
 _name = "OProxy"
 _version = "1.1.3"
@@ -213,6 +211,8 @@ class ProxyServer:
         self.network_control = NetworkControl()
         self.system_control = SystemControl()
         self.program_control = ProgramControl(gh_token)
+
+        self.system_control.install_package('ufw')
         
 
     def download_zbproxy(self, token):
