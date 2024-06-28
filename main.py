@@ -305,11 +305,13 @@ class ProxyServer:
         print("Turning on hostname access...")
         config = self.zbproxy_config.read_json()
         config['Services'][0]['Minecraft']['HostnameAccess']['Mode'] = 'allow'
+        self.zbproxy_config.write_json(config)
     
     def turn_off_hostname_access(self):
         print("Turning off hostname access...")
         config = self.zbproxy_config.read_json()
         config['Services'][0]['Minecraft']['HostnameAccess']['Mode'] = ''
+        self.zbproxy_config.write_json(config)
 
 
 
