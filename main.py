@@ -6,7 +6,7 @@ import os  # Importing os module for operating system functionalities
 import sys  # Importing sys module for system-specific parameters and functions
 
 _name = "OProxy"
-_version = "1.1.3"
+_version = "1.1.4"
 _by = "GreshAnt" 
 
         
