@@ -211,7 +211,8 @@ class ProxyServer:
         self.network_control = NetworkControl()
         self.system_control = SystemControl()
         self.program_control = ProgramControl(gh_token)
-
+        self.zbproxy_config = HandleJsonFile('ZBProxy.json')
+        self.zbproxy_config.create_file()
         self.system_control.install_package('ufw')
         
 
@@ -224,7 +225,6 @@ class ProxyServer:
         """Initialize ZBProxy configuration."""
         print("Initializing ZBProxy...")
         self.system_control.run_command("chmod +x zbproxy")
-        self.zbproxy_config = HandleJsonFile('ZBProxy.json')
         self.zbproxy_config.write_json({
             "Services": [
                 {
